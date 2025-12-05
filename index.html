@@ -10,12 +10,24 @@
 
     <link rel="stylesheet" href="style.css">
 
-    <script src="script.js" defer></script>
+    <script type="module" src="maps.js" defer></script>
+    <script type="module" src="script.js" defer></script>
 </head>
 
 <body>
+    <header>
+        <h1>robo de ia :(</h1>
+    </header>
     <main>
-        <canvas width="600" height="600">
+        <div id="container">
+            <canvas width="600" height="600"></canvas>
+            <section>
+                <button id="play">Iniciar</button>
+                <button id="restart" disabled>Reiniciar</button>
+                <button id="edit">Editar</button>
+                <button id="map1">Mapa 1</button>
+            </section>
+        </div>
     </main>
 </body>
 
