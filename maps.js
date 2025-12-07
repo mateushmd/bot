@@ -5,6 +5,26 @@ const DIRS = {
     r: 8
 };
 
+function rightOf(x) {
+	const mapping = {
+		1: DIRS.r,
+		2: DIRS.l,
+		4: DIRS.u,
+		8: DIRS.d,
+	}
+	return mapping[x]
+}
+
+function leftOf(x) {
+	const mapping = {
+		1: DIRS.l,
+		2: DIRS.r,
+		4: DIRS.d,
+		8: DIRS.u,
+	}
+	return mapping[x];
+}
+
 const MAP1 = [
     [5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 9],
     [12, 5, 3, 3, 3, 3, 3, 3, 3, 3, 1, 3, 3, 3, 3, 8],
@@ -43,4 +63,6 @@ function validate(map) {
     }
 }
 
-export { DIRS, MAP1 };
+export { DIRS, MAP1, rightOf, leftOf };
+globalThis.rightOf = rightOf;
+globalThis.leftOf = leftOf;

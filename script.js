@@ -1,4 +1,4 @@
-import { DIRS, MAP1 } from './maps.js';
+import { DIRS, MAP1, rightOf, leftOf } from './maps.js';
 
 class Vector2 {
     constructor(x, y) {
@@ -14,6 +14,71 @@ const MODES = {
     paused: 3,
 };
 
+function inGrid(x) {
+	return x*37.5
+}
+
+class Mouse {
+	constructor(x, y) {
+		this.facing = DIRS.u
+		this.pos = new Vector2(0, 0)
+		this.last_pos = new Vector2(-1, -1)
+		if (x != undefined && y != undefined) {
+			this.pos.x = x
+			this.pos.y = y
+		}
+	}
+
+	canWalk(direction) {
+		let res = false
+		if (direction == DIRS.u) {
+			res = ((map[this.pos.y][this.pos.x] & DIRS.u) == 0)
+		} else if (direction == DIRS.d) {
+			console.log(map[1][0])
+			res = ((map[this.pos.y][this.pos.x] & DIRS.d) == 0)
+		} else if (direction == DIRS.l) {
+			res = ((map[this.pos.y][this.pos.x] & DIRS.l) == 0)
+		} else if (direction == DIRS.r) {
+			res = ((map[this.pos.y][this.pos.x] & DIRS.r) == 0)
+		}
+		return res
+	}
+
+	turnLeft() {
+		this.facing = leftOf(this.facing)
+	}
+
+	turnRight() {
+		this.facing = rightOf(this.facing)
+	}
+
+	move() {
+		let res = false
+		let direction = this.facing
+
+		console.log("move\n\n\n")
+		if (this.canWalk(direction)) {
+			console.log("can walk\n\n\n")
+			this.last_pos.x = this.pos.x
+			this.last_pos.y = this.pos.y
+			if (direction == DIRS.u) {
+				this.pos.y -= 1
+			} else if (direction == DIRS.d) {
+				this.pos.y += 1
+			} else if (direction == DIRS.l) {
+				this.pos.x -= 1
+			} else if (direction == DIRS.r) {
+				this.pos.x += 1
+			}
+			res = true
+		}
+		if (res) {
+			redraw()
+		}
+		return res
+	}
+}
+
 const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
 const playBtn = document.querySelector('#play');
@@ -28,6 +93,8 @@ let mousePos = new Vector2(-1, -1);
 let mode = MODES.idle;
 
 let editInterval = null;
+
+let robot = new Mouse(0, 0);
 
 let map = [
     [DIRS.u | DIRS.l, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u | DIRS.r],
@@ -60,6 +127,8 @@ playBtn.addEventListener('click', (e) => {
         mode = MODES.playing;
         restartBtn.disabled = false;
         editBtn.disabled = true;
+		startGame();
+
     } else if (mode === MODES.playing) {
         button.innerHTML = 'Continuar';
         mode = MODES.paused;
@@ -104,8 +173,19 @@ function getMousePos(e) {
 
 function init() {
     map = MAP1;
+	redraw()
+}
+
+function redraw() {
+	context.clearRect(0, 0, canvas.width, canvas.height)
     drawGrid();
+	drawRobot();
     drawMap();
+}
+
+function drawRobot() {
+    context.fillStyle = '#FF000020';
+    context.fillRect(inGrid(robot.pos.x), inGrid(robot.pos.y), cellSize.x, cellSize.y);
 }
 
 function drawGrid() {
@@ -114,9 +194,7 @@ function drawGrid() {
 
     context.beginPath();
 
-    context.fillStyle = '#FF000010';
-    context.fillRect(0, 0, cellSize.x, cellSize.y);
-    context.fillStyle = '#00FF0010';
+    context.fillStyle = '#00FF0020';
     context.fillRect(cellSize.x * (16 / 2 - 1), cellSize.y * (16 / 2 - 1), cellSize.x * 2, cellSize.y * 2);
 
     for (let i = 0; i < gridSize.x - 1; i++) {
@@ -247,6 +325,7 @@ function editDraw() {
     drawGrid();
     drawEditView();
     drawMap();
+	robot.move()
 }
 
 function addWall() {
@@ -306,3 +385,7 @@ function removeWall() {
         }
     }
 }
+
+
+export { robot };
+globalThis.robot = robot;

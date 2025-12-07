@@ -9,9 +9,24 @@
     <title>Bot</title>
 
     <link rel="stylesheet" href="style.css">
+	<script>
+		var Module = {
+			onRuntimeInitialized: function() {
+				console.log("WASM loaded");
+			}
+		};
+	</script>
 
     <script type="module" src="maps.js" defer></script>
     <script type="module" src="script.js" defer></script>
+    <script src="astar.js" defer></script>
+	<script>
+		function startGame() {
+			console.log(Module)
+			Module.ccall('main');
+		}
+	</script>
+
 </head>
 
 <body>

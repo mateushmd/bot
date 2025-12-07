@@ -318,27 +318,24 @@ void move (std::vector<int> path) {
 	setColor(dx, dy, 'r');
 
 	for (int i = (int)path.size()-2; i > -1; i--) {
-//			fprintf(stderr, "[%d]\n", path[i]);
 		if (!checkWalls()) {
 			turn(PPos, path[i]);
 			moveForward(1);
 			PPos = path[i];
 		} else {
-//				fprintf(stderr, "New wall detected - Running A*\n");
 			i = -1;
 		}
 	}
-//		fprintf(stderr, "\n---\n\n");
 }
 
-int main (void) {
+void mazeSolver(void) {
 
 	srand(time(NULL));
     for (int i = 0; i < M_Size; i++) {
         dist[1][i] = 0x7fffffff; // H
     }
 
-	while (true) {
+	if (true) {
 
 		int dx1 = 7;
 		int dy1 = 7;
@@ -352,10 +349,17 @@ int main (void) {
 		PPos = 0;
 		facing = 0;
 
-		while (!inRange(PPos, d1, d2)) {
+		int i = 0;
+		while (!inRange(PPos, d1, d2) && i < 50) {
 			move(astar(d1, d2));
+			i++;
 		}
 		ackReset();
 	}
+}
+
+int main (void) {
+	console("test\n");
+	mazeSolver();
 	return(0);
 }
