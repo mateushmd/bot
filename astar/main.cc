@@ -56,10 +56,22 @@ inline int manhattan (int u, int v) {
 	return ((abs(ux-vx) + abs(uy-vy)));
 }
 
+inline int chebyshev (int u, int v) {
+	int ux = getX(u);
+	int uy = getY(u);
+
+	int vx = getX(v);
+	int vy = getY(v);
+
+	return std::max(abs(ux-vx), abs(uy-vy));
+}
+
 inline int heuristic (int u, int d1, int d2) {
 	return std::min(manhattan(u, d1), manhattan(u, d2));
 //		return std::min(euclidean(u, d1), euclidean(u, d2));
+//		return std::min(chebyshev(u, d1), chebyshev(u, d2));
 //		return randomH();
+//		return 0;	// Essencialy the same as running a BFS or Dijkstra's algorithm
 }
 
 inline int F(int u) {
@@ -290,12 +302,20 @@ bool checkWalls(void) {
 void move (std::vector<int> path) {
 
 	clearAllColor();
-	for (int i = (int)path.size()-2; i > -1; i--) {
+
+	setColor(getX(PPos), getY(PPos), 'g');
+
+	for (int i = (int)path.size()-2; i > 0; i--) {
 		int u = path[i];
 		int ux = getX(u);
 		int uy = getY(u);
 		setColor(ux, uy, 'b');
 	}
+
+	int dest = path.front();
+	int dx = getX(dest);
+	int dy = getY(dest);
+	setColor(dx, dy, 'r');
 
 	for (int i = (int)path.size()-2; i > -1; i--) {
 //			fprintf(stderr, "[%d]\n", path[i]);
@@ -313,6 +333,7 @@ void move (std::vector<int> path) {
 
 int main (void) {
 
+	srand(time(NULL));
     for (int i = 0; i < M_Size; i++) {
         dist[1][i] = 0x7fffffff; // H
     }
