@@ -1,4 +1,7 @@
 # Simulador de Labirinto
+
++ Disponível em: https://mateushmd.github.io/bot/
+
 + Nesse simulador, o usuário pode testar 6 algoritmos de resolução de labirinto diferentes, em um labirinto customizável. Os métodos disponíveis são:
     1. A* (Heurística distância de Manhattan)
     2. A* (Heurística distância Euclideana)
