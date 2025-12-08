@@ -80,6 +80,7 @@ document.addEventListener('mouseenter', (e) => getMousePos(e));
 playBtn.addEventListener('click', (e) => {
     const button = e.target;
     if (mode === MODES.idle) {
+		playBtn.disabled = true;
         restartBtn.disabled = false;
         editBtn.disabled = true;
 		redraw()
@@ -92,6 +93,7 @@ restartBtn.addEventListener('click', (e) => {
         mode = MODES.idle;
 		count.innerHTML = 0
         editBtn.disabled = false;
+        playBtn.disabled = false;
         playBtn.innerHTML = 'Iniciar';
         button.disabled = true;
 		redraw()

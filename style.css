@@ -55,10 +55,12 @@ canvas {
 }
 
 section {
+	display: flex;
+	gap: 10px;
     width: 100%;
 }
 
-button, select, select:after {
+button, select, select:after, input {
     font-family: inherit;
     font-weight: 1000;
     background: black;
