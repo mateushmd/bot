@@ -10,8 +10,6 @@ class Vector2 {
 const MODES = {
     idle: 0,
     editing: 1,
-    playing: 2,
-    paused: 3,
 };
 
 function inGrid(x) {
@@ -20,69 +18,11 @@ function inGrid(x) {
 
 class Mouse {
 	constructor(x, y) {
-		this.moved = false;
-		this.facing = DIRS.d
 		this.pos = new Vector2(0, 0)
-		this.last_pos = new Vector2(-1, -1)
 		if (x != undefined && y != undefined) {
 			this.pos.x = x
 			this.pos.y = y
 		}
-	}
-
-	canWalk(direction) {
-		let res = false
-		if (direction == DIRS.u) {
-			res = ((map[this.pos.y][this.pos.x] & DIRS.u) == 0)
-		} else if (direction == DIRS.d) {
-			res = ((map[this.pos.y][this.pos.x] & DIRS.d) == 0)
-		} else if (direction == DIRS.l) {
-			res = ((map[this.pos.y][this.pos.x] & DIRS.l) == 0)
-		} else if (direction == DIRS.r) {
-			res = ((map[this.pos.y][this.pos.x] & DIRS.r) == 0)
-		}
-		return res
-	}
-
-	turnLeft() {
-		this.facing = leftOf(this.facing)
-	}
-
-	turnRight() {
-		this.facing = rightOf(this.facing)
-	}
-
-	print() {
-		console.log("pos: ", x, y);
-		console.log("facing: ", facing);
-	}
-
-	move() {
-		this.moved = true;
-		let res = false
-		let direction = this.facing
-
-		if (this.canWalk(direction)) {
-
-			this.last_pos.x = this.pos.x
-			this.last_pos.y = this.pos.y
-
-			if (direction == DIRS.u) {
-				this.pos.y -= 1
-			} else if (direction == DIRS.d) {
-				this.pos.y += 1
-			} else if (direction == DIRS.l) {
-				this.pos.x -= 1
-			} else if (direction == DIRS.r) {
-				this.pos.x += 1
-			}
-			res = true
-		}
-		if (res) {
-			redraw()
-			this.print();
-		}
-		return res
 	}
 }
 
@@ -102,6 +42,13 @@ let mousePos = new Vector2(-1, -1);
 let mode = MODES.idle;
 
 let editInterval = null;
+
+let searchMethod = 0; // 0 -> A* (manhattan)
+					  // 1 -> A* (euclidean)
+					  // 2 -> A* (chebyshev)
+	    			  // 3 -> A* (random)
+	  				  // 4 -> Dijkstra
+					  // 5 -> Bfs
 
 let map = [
     [DIRS.u | DIRS.l, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u | DIRS.r],
@@ -129,22 +76,16 @@ document.addEventListener('mousemove', (e) => getMousePos(e));
 document.addEventListener('mouseenter', (e) => getMousePos(e));
 playBtn.addEventListener('click', (e) => {
     const button = e.target;
-    if (mode === MODES.idle || mode === MODES.paused) {
-        button.innerHTML = 'Pausar';
-        mode = MODES.playing;
+    if (mode === MODES.idle) {
         restartBtn.disabled = false;
         editBtn.disabled = true;
-		startGame();
-
-    } else if (mode === MODES.playing) {
-        button.innerHTML = 'Continuar';
-        mode = MODES.paused;
-        editBtn.disabled = true;
+		reset()
+		searchDraw();
     }
 });
 restartBtn.addEventListener('click', (e) => {
     const button = e.target;
-    if (mode === MODES.playing || mode === MODES.paused) {
+    if (mode !== MODES.editing) {
         mode = MODES.idle;
         editBtn.disabled = false;
         playBtn.innerHTML = 'Iniciar';
@@ -172,6 +113,25 @@ canvas.addEventListener('contextmenu', (e) => {
     removeWall();
 });
 
+document.querySelector("select").addEventListener("change", (e) => {
+	const selected = e.target.value
+
+	if (selected === "astar1") {
+		searchMethod = 0
+	} else if (selected === "astar2") {
+		searchMethod = 1
+	} else if (selected === "astar3") {
+		searchMethod = 2
+	} else if (selected === "astar4") {
+		searchMethod = 3
+	} else if (selected === "dijkstra") {
+		searchMethod = 4
+	} else if (selected === "bfs") {
+		searchMethod = 5
+	}
+
+});
+
 function getMousePos(e) {
     const rect = canvas.getBoundingClientRect();
     mousePos.x = e.clientX - rect.left;
@@ -196,17 +156,17 @@ function redraw() {
 }
 
 function drawRobot() {
-    context.fillStyle = '#FF000020';
+    context.fillStyle = '#FF000060';
     context.fillRect(inGrid(robot.pos.x), inGrid(robot.pos.y), cellSize.x, cellSize.y);
 }
 
 function drawGrid() {
-    context.strokeStyle = '#FFFFFF20';
+    context.strokeStyle = '#FFFFFF40';
     context.setLineDash([5, 5]);
 
     context.beginPath();
 
-    context.fillStyle = '#00FF0020';
+    context.fillStyle = '#00FF0060';
     context.fillRect(cellSize.x * (16 / 2 - 1), cellSize.y * (16 / 2 - 1), cellSize.x * 2, cellSize.y * 2);
 
     for (let i = 0; i < gridSize.x - 1; i++) {
@@ -337,7 +297,7 @@ function editDraw() {
     drawGrid();
     drawEditView();
     drawMap();
-	robot.move()
+	drawRobot();
 }
 
 function addWall() {
@@ -437,11 +397,28 @@ function manhattan (v1, v2) {
 	return (Math.abs(v1.x-v2.x) + Math.abs(v1.y-v2.y))
 }
 
+function euclidean (v1, v2) {
+	return (Math.sqrt(Math.abs((v1.x*v1.x) - (v2.x*v2.x)) + Math.abs((v1.y*v1.y) - (v2.y*v2.y)) ))
+}
+
+function chebyshev (v1, v2) {
+	return Math.max(Math.abs(v1.x-v2.x), Math.abs(v1.y-v2.y));
+}
+
+function randomH () {
+	return (Math.floor(Math.random() * 100))
+}
+
 function heuristic (type, pos, v1, v2) {
 	let value = -1
-
 	if (type === 0) {
 		value = Math.min(manhattan(pos, v1), manhattan(pos, v2));
+	} else if (type === 1) {
+		value = Math.min(euclidean(pos, v1), euclidean(pos, v2));
+	} else if (type === 2) {
+		value = Math.min(chebyshev(pos, v1), chebyshev(pos, v2));
+	} else if (type === 3) {
+		value = randomH();
 	}
 	return (value)
 }
@@ -511,7 +488,7 @@ function neighbors(u) {
 	return (res)
 }
 
-function astar(d1, d2) {
+function astar(d1, d2, htype) {
 	searchSetup()
 	let pq = [robot.pos];
 
@@ -533,7 +510,7 @@ function astar(d1, d2) {
 					}
 
 					if (H[v.y][v.x] === Infinity) {
-						H[v.y][v.x] = heuristic(0, v, d1, d2);
+						H[v.y][v.x] = heuristic(htype, v, d1, d2);
 					}
 
 					parent[v.y][v.x] = u
@@ -644,9 +621,23 @@ function BFS(d1, d2) {
 	return (path)
 }
 
-function startGame() {
-	let path = BFS(new Vector2(7,7), new Vector2(8,8))
-	context.fillStyle = '#0000FF20';
+function searchDraw() {
+	let path = []
+	if (searchMethod == 0) {
+		path = astar(new Vector2(7,7), new Vector2(8,8), 0)
+	} else if (searchMethod == 1) {
+		path = astar(new Vector2(7,7), new Vector2(8,8), 1)
+	} else if (searchMethod == 2) {
+		path = astar(new Vector2(7,7), new Vector2(8,8), 2)
+	} else if (searchMethod == 3) {
+		path = astar(new Vector2(7,7), new Vector2(8,8), 3)
+	} else if (searchMethod == 4) {
+		path = dijkstra(new Vector2(7,7), new Vector2(8,8))
+	} else if (searchMethod == 5) {
+		path = BFS(new Vector2(7,7), new Vector2(8,8))
+	}
+
+	context.fillStyle = '#0000FF60';
 	for (let i = 0; i < path.length; i++) {
 		let u = path[i]
 		context.fillRect(inGrid(u.x), inGrid(u.y), cellSize.x, cellSize.y);
