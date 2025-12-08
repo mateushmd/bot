@@ -20,7 +20,8 @@ function inGrid(x) {
 
 class Mouse {
 	constructor(x, y) {
-		this.facing = DIRS.u
+		this.moved = false;
+		this.facing = DIRS.d
 		this.pos = new Vector2(0, 0)
 		this.last_pos = new Vector2(-1, -1)
 		if (x != undefined && y != undefined) {
@@ -34,7 +35,6 @@ class Mouse {
 		if (direction == DIRS.u) {
 			res = ((map[this.pos.y][this.pos.x] & DIRS.u) == 0)
 		} else if (direction == DIRS.d) {
-			console.log(map[1][0])
 			res = ((map[this.pos.y][this.pos.x] & DIRS.d) == 0)
 		} else if (direction == DIRS.l) {
 			res = ((map[this.pos.y][this.pos.x] & DIRS.l) == 0)
@@ -52,15 +52,21 @@ class Mouse {
 		this.facing = rightOf(this.facing)
 	}
 
+	print() {
+		console.log("pos: ", x, y);
+		console.log("facing: ", facing);
+	}
+
 	move() {
+		this.moved = true;
 		let res = false
 		let direction = this.facing
 
-		console.log("move\n\n\n")
 		if (this.canWalk(direction)) {
-			console.log("can walk\n\n\n")
+
 			this.last_pos.x = this.pos.x
 			this.last_pos.y = this.pos.y
+
 			if (direction == DIRS.u) {
 				this.pos.y -= 1
 			} else if (direction == DIRS.d) {
@@ -74,10 +80,13 @@ class Mouse {
 		}
 		if (res) {
 			redraw()
+			this.print();
 		}
 		return res
 	}
 }
+
+let robot = new Mouse(0, 0);
 
 const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
@@ -93,8 +102,6 @@ let mousePos = new Vector2(-1, -1);
 let mode = MODES.idle;
 
 let editInterval = null;
-
-let robot = new Mouse(0, 0);
 
 let map = [
     [DIRS.u | DIRS.l, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u | DIRS.r],
@@ -140,8 +147,9 @@ restartBtn.addEventListener('click', (e) => {
     if (mode === MODES.playing || mode === MODES.paused) {
         mode = MODES.idle;
         editBtn.disabled = false;
-        playBtn.InnerHTML = 'Iniciar';
+        playBtn.innerHTML = 'Iniciar';
         button.disabled = true;
+		reset()
     }
 })
 editBtn.addEventListener('click', (e) => {
@@ -170,6 +178,10 @@ function getMousePos(e) {
     mousePos.y = e.clientY - rect.top;
 }
 
+function reset() {
+	robot = new Mouse(0, 0)
+	redraw();
+}
 
 function init() {
     map = MAP1;
@@ -386,6 +398,257 @@ function removeWall() {
     }
 }
 
+const MWidth = 16
+let visited = new Array(MWidth);
+let G = new Array(MWidth);
+let H = new Array(MWidth);
+let parent = new Array(MWidth);
 
-export { robot };
-globalThis.robot = robot;
+function searchSetup() {
+
+	visited = new Array(MWidth);
+	G = new Array(MWidth);
+	H = new Array(MWidth);
+	parent = new Array(MWidth);
+
+	for (let i = 0; i < MWidth; i++) {
+		visited[i] = Array(MWidth)
+		parent[i] = Array(MWidth)
+		G[i] = Array(MWidth)
+		H[i] = Array(MWidth)
+		for (let j = 0; j < MWidth; j++) {
+			visited[i][j] = false
+			parent[i][j] = -1
+			G[i][j] = Infinity
+			H[i][j] = Infinity
+		}
+	}
+
+	G[robot.pos.y][robot.pos.x] = 0
+}
+
+function F(v) {
+	let g = G[v.y][v.x]
+	let h = H[v.y][v.x]
+	return (g+h)
+}
+
+function manhattan (v1, v2) {
+	return (Math.abs(v1.x-v2.x) + Math.abs(v1.y-v2.y))
+}
+
+function heuristic (type, pos, v1, v2) {
+	let value = -1
+
+	if (type === 0) {
+		value = Math.min(manhattan(pos, v1), manhattan(pos, v2));
+	}
+	return (value)
+}
+
+function minHeap (v1, v2) {
+	let fv1 = F(v1)
+	let fv2 = F(v2)
+
+	let res = false
+	if (fv1 === fv2) {
+		res = (H[v1.y][v1.x] > H[v2.y][v2.x])
+	} else {
+		res = (fv1 > fv2)
+	}
+	return (res)
+}
+
+function qsort (arr, L, R) {
+	let pivot = arr[Math.floor((L+R)/2.0)];
+	let l = L
+	let r = R
+
+	let res = arr
+
+	while (l <= r) {
+		while (minHeap(arr[l], pivot)) {
+			l++
+		}
+		while (minHeap(pivot, arr[r])) {
+			r--
+		}
+		if (l <= r) {
+			let tmp = arr[l]
+			arr[l] = arr[r]
+			arr[r] = tmp
+			l++
+			r--
+		}
+	}
+	if (l < R) {
+		res = qsort(arr, l, R)
+	}
+	if (L < r) {
+		res = qsort(arr, L, r)
+	}
+	return (res)
+}
+
+function inRange(pos, d1, d2) {
+	return ((pos.x >= d1.x && pos.x <= d2.x) && (pos.y >= d1.y && pos.y <= d2.y))
+}
+
+function neighbors(u) {
+	let res = []
+	if ((map[u.y][u.x] & DIRS.u) === 0) {
+		res.push(new Vector2(u.x, (u.y-1)))
+	}
+	if ((map[u.y][u.x] & DIRS.d) === 0) {
+		res.push(new Vector2(u.x, (u.y+1)))
+	}
+	if ((map[u.y][u.x] & DIRS.l) === 0) {
+		res.push(new Vector2((u.x-1), u.y))
+	}
+	if ((map[u.y][u.x] & DIRS.r) === 0) {
+		res.push(new Vector2((u.x+1), u.y))
+	}
+	return (res)
+}
+
+function astar(d1, d2) {
+	searchSetup()
+	let pq = [robot.pos];
+
+	let stop = -1
+	while (pq.length != 0 && stop == -1) {
+		let u = pq.pop()
+		if (inRange(u, d1, d2)) {
+			stop = u
+		} else if (!visited[u.y][u.x]) {
+			visited[u.y][u.x] = true;
+			let N = neighbors(u);
+			for (let i = 0; i < N.length; i++) {
+				let v = N[i]
+				if (!visited[v.y][v.x]) {
+
+										
+					if (G[v.y][v.x] > (G[u.y][u.x] + 1)) {
+						G[v.y][v.x] = G[u.y][u.x] + 1
+					}
+
+					if (H[v.y][v.x] === Infinity) {
+						H[v.y][v.x] = heuristic(0, v, d1, d2);
+					}
+
+					parent[v.y][v.x] = u
+
+					pq.push(v)
+					pq = qsort(pq, 0, (pq.length-1));
+				}
+			}
+		}
+	}
+
+	let path = []
+	let i = stop
+	while (i !== -1 && (i.x !== robot.pos.x || i.y !== robot.pos.y)) {
+		path.push(i)
+		i = parent[i.y][i.x]
+	}
+	path.push(i)
+
+	return (path)
+}
+
+function dijkstra(d1, d2) {
+	searchSetup()
+	let pq = [robot.pos];
+
+	let stop = -1
+	while (pq.length != 0 && stop == -1) {
+		let u = pq.pop()
+		if (inRange(u, d1, d2)) {
+			stop = u
+		} else if (!visited[u.y][u.x]) {
+			visited[u.y][u.x] = true;
+			let N = neighbors(u);
+			for (let i = 0; i < N.length; i++) {
+				let v = N[i]
+				if (!visited[v.y][v.x]) {
+
+										
+					if (G[v.y][v.x] > (G[u.y][u.x] + 1)) {
+						G[v.y][v.x] = G[u.y][u.x] + 1
+					}
+
+					if (H[v.y][v.x] === Infinity) {
+						H[v.y][v.x] = 0
+					}
+
+					parent[v.y][v.x] = u
+
+					pq.push(v)
+					pq = qsort(pq, 0, (pq.length-1));
+				}
+			}
+		}
+	}
+
+	let path = []
+	let i = stop
+	while (i !== -1 && (i.x !== robot.pos.x || i.y !== robot.pos.y)) {
+		path.push(i)
+		i = parent[i.y][i.x]
+	}
+	path.push(i)
+
+	return (path)
+}
+
+function BFS(d1, d2) {
+	searchSetup()
+	let pq = [robot.pos];
+
+	let stop = -1
+	while (pq.length != 0 && stop == -1) {
+		let u = pq.shift()
+		if (inRange(u, d1, d2)) {
+			stop = u
+		} else if (!visited[u.y][u.x]) {
+			visited[u.y][u.x] = true;
+			let N = neighbors(u);
+			for (let i = 0; i < N.length; i++) {
+				let v = N[i]
+				if (!visited[v.y][v.x]) {
+
+					if (G[v.y][v.x] > (G[u.y][u.x] + 1)) {
+						G[v.y][v.x] = G[u.y][u.x] + 1
+					}
+
+					if (H[v.y][v.x] === Infinity) {
+						H[v.y][v.x] = 0
+					}
+
+					parent[v.y][v.x] = u
+
+					pq.push(v)
+				}
+			}
+		}
+	}
+
+	let path = []
+	let i = stop
+	while (i !== -1 && (i.x !== robot.pos.x || i.y !== robot.pos.y)) {
+		path.push(i)
+		i = parent[i.y][i.x]
+	}
+	path.push(i)
+
+	return (path)
+}
+
+function startGame() {
+	let path = BFS(new Vector2(7,7), new Vector2(8,8))
+	context.fillStyle = '#0000FF20';
+	for (let i = 0; i < path.length; i++) {
+		let u = path[i]
+		context.fillRect(inGrid(u.x), inGrid(u.y), cellSize.x, cellSize.y);
+	}
+}

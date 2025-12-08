@@ -9,38 +9,30 @@
     <title>Bot</title>
 
     <link rel="stylesheet" href="style.css">
-	<script>
-		var Module = {
-			onRuntimeInitialized: function() {
-				console.log("WASM loaded");
-			}
-		};
-	</script>
-
     <script type="module" src="maps.js" defer></script>
     <script type="module" src="script.js" defer></script>
-    <script src="astar.js" defer></script>
-	<script>
-		function startGame() {
-			console.log(Module)
-			Module.ccall('main');
-		}
-	</script>
 
 </head>
 
 <body>
     <header>
-        <h1>robo de ia :(</h1>
+		<h1>robo de ia (._.</h1>
     </header>
     <main>
         <div id="container">
             <canvas width="600" height="600"></canvas>
+			<select name="cars" id="cars">
+			  <option value="astar1">A* (Manhattan)</option>
+			  <option value="astar2">A* (Euclidean)</option>
+			  <option value="astar3">A* (Chebyshev)</option>
+			  <option value="astar4">A* (Random)</option>
+			  <option value="dijkstra">Dijkstra</option>
+			  <option value="bfs">BFS</option>
+			</select>
             <section>
                 <button id="play">Iniciar</button>
                 <button id="restart" disabled>Reiniciar</button>
                 <button id="edit">Editar</button>
-                <button id="map1">Mapa 1</button>
             </section>
         </div>
     </main>
