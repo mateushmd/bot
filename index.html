@@ -20,8 +20,7 @@
     </header>
     <main>
         <div id="container">
-            <canvas width="600" height="600"></canvas>
-			<select name="cars" id="cars">
+			<select name="algorithms" id="algorithms">
 			  <option value="astar1">A* (Manhattan)</option>
 			  <option value="astar2">A* (Euclidean)</option>
 			  <option value="astar3">A* (Chebyshev)</option>
@@ -29,10 +28,14 @@
 			  <option value="dijkstra">Dijkstra</option>
 			  <option value="bfs">BFS</option>
 			</select>
+			<span id="node-count">0</span>
+            <canvas width="600" height="600"></canvas>
             <section>
                 <button id="play">Iniciar</button>
                 <button id="restart" disabled>Reiniciar</button>
                 <button id="edit">Editar</button>
+				<input type="number" id="inix" name="x inicial" min="0" max="15" value="0">
+				<input type="number" id="iniy" name="y inicial" min="0" max="15" value="0">
             </section>
         </div>
     </main>

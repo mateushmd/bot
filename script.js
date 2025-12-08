@@ -33,6 +33,9 @@ const context = canvas.getContext('2d');
 const playBtn = document.querySelector('#play');
 const restartBtn = document.querySelector('#restart');
 const editBtn = document.querySelector('#edit');
+const initx = document.querySelector('#inix');
+const inity = document.querySelector('#iniy');
+const count = document.querySelector('span#node-count');
 
 let screenSize = new Vector2(canvas.width, canvas.height);
 let gridSize = new Vector2(16, 16);
@@ -79,7 +82,7 @@ playBtn.addEventListener('click', (e) => {
     if (mode === MODES.idle) {
         restartBtn.disabled = false;
         editBtn.disabled = true;
-		reset()
+		redraw()
 		searchDraw();
     }
 });
@@ -87,10 +90,11 @@ restartBtn.addEventListener('click', (e) => {
     const button = e.target;
     if (mode !== MODES.editing) {
         mode = MODES.idle;
+		count.innerHTML = 0
         editBtn.disabled = false;
         playBtn.innerHTML = 'Iniciar';
         button.disabled = true;
-		reset()
+		redraw()
     }
 })
 editBtn.addEventListener('click', (e) => {
@@ -132,15 +136,24 @@ document.querySelector("select").addEventListener("change", (e) => {
 
 });
 
+initx.addEventListener("change", (e) => {
+	restartBtn.click()
+	const selected = e.target.value
+	robot.pos.x = parseInt(selected)
+	redraw()
+});
+
+inity.addEventListener("change", (e) => {
+	restartBtn.click()
+	const selected = e.target.value
+	robot.pos.y = parseInt(selected)
+	redraw()
+});
+
 function getMousePos(e) {
     const rect = canvas.getBoundingClientRect();
     mousePos.x = e.clientX - rect.left;
     mousePos.y = e.clientY - rect.top;
-}
-
-function reset() {
-	robot = new Mouse(0, 0)
-	redraw();
 }
 
 function init() {
@@ -636,6 +649,7 @@ function searchDraw() {
 	} else if (searchMethod == 5) {
 		path = BFS(new Vector2(7,7), new Vector2(8,8))
 	}
+	count.innerHTML = path.length
 
 	context.fillStyle = '#0000FF60';
 	for (let i = 0; i < path.length; i++) {
