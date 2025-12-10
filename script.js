@@ -413,7 +413,9 @@ function manhattan (v1, v2) {
 }
 
 function euclidean (v1, v2) {
-	return (Math.sqrt(Math.abs((v1.x*v1.x) - (v2.x*v2.x)) + Math.abs((v1.y*v1.y) - (v2.y*v2.y)) ))
+	let dx = v1.x - v2.x
+	let dy = v1.y - v2.y
+	return (Math.sqrt((dx*dx) + (dy*dy)))
 }
 
 function chebyshev (v1, v2) {
@@ -451,35 +453,16 @@ function minHeap (v1, v2) {
 	return (res)
 }
 
-function qsort (arr, L, R) {
-	let pivot = arr[Math.floor((L+R)/2.0)];
-	let l = L
-	let r = R
-
-	let res = arr
-
-	while (l <= r) {
-		while (minHeap(arr[l], pivot)) {
-			l++
+function insesort (arr) {
+	for (let i = 1; i < arr.length; i++) {
+		let tmp = arr[i];
+		let j = i-1;
+		while ( (j >= 0) && minHeap(tmp, arr[j])) {
+			arr[j+1] = arr[j];
+			j--;
 		}
-		while (minHeap(pivot, arr[r])) {
-			r--
-		}
-		if (l <= r) {
-			let tmp = arr[l]
-			arr[l] = arr[r]
-			arr[r] = tmp
-			l++
-			r--
-		}
+		arr[j+1] = tmp
 	}
-	if (l < R) {
-		res = qsort(arr, l, R)
-	}
-	if (L < r) {
-		res = qsort(arr, L, r)
-	}
-	return (res)
 }
 
 function inRange(pos, d1, d2) {
@@ -513,25 +496,28 @@ function astar(d1, d2, htype) {
 		if (inRange(u, d1, d2)) {
 			stop = u
 		} else if (!visited[u.y][u.x]) {
+
 			visited[u.y][u.x] = true;
+
+			let nG = (G[u.y][u.x] + 1)
+
 			let N = neighbors(u);
 			for (let i = 0; i < N.length; i++) {
 				let v = N[i]
 				if (!visited[v.y][v.x]) {
 
-										
-					if (G[v.y][v.x] > (G[u.y][u.x] + 1)) {
-						G[v.y][v.x] = G[u.y][u.x] + 1
+					if (G[v.y][v.x] > nG) {
+						G[v.y][v.x] = nG 
+
+						if (H[v.y][v.x] === Infinity) {
+							H[v.y][v.x] = heuristic(htype, v, d1, d2);
+						}
+
+						parent[v.y][v.x] = u
+
+						pq.push(v)
+						insesort(pq, 0, (pq.length-1));
 					}
-
-					if (H[v.y][v.x] === Infinity) {
-						H[v.y][v.x] = heuristic(htype, v, d1, d2);
-					}
-
-					parent[v.y][v.x] = u
-
-					pq.push(v)
-					pq = qsort(pq, 0, (pq.length-1));
 				}
 			}
 		}
