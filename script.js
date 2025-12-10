@@ -1,4 +1,4 @@
-import { DIRS, MAP0, MAP1, rightOf, leftOf } from './maps.js';
+import { DIRS, MAP0, MAP1 } from './maps.js';
 
 class Vector2 {
     constructor(x, y) {

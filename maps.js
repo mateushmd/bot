@@ -5,46 +5,6 @@ const DIRS = {
     r: 8
 };
 
-function rightOf(x) {
-	const mapping = {
-		1: DIRS.r,
-		2: DIRS.l,
-		4: DIRS.u,
-		8: DIRS.d,
-	}
-	return mapping[x]
-}
-
-function leftOf(x) {
-	const mapping = {
-		1: DIRS.l,
-		2: DIRS.r,
-		4: DIRS.d,
-		8: DIRS.u,
-	}
-	return mapping[x];
-}
-
-/*
-const MAPx = [
-    [5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 9],
-    [12, 5, 3, 3, 3, 3, 3, 3, 3, 3, 1, 3, 3, 3, 3, 8],
-    [12, 12, 5, 3, 3, 3, 1, 3, 11, 7, 2, 1, 3, 3, 9, 12],
-    [12, 12, 12, 13, 5, 9, 6, 3, 9, 13, 5, 10, 5, 3, 10, 12],
-    [12, 12, 12, 4, 10, 12, 5, 9, 6, 8, 12, 7, 2, 3, 9, 12],
-    [12, 12, 12, 6, 9, 12, 12, 6, 9, 6, 10, 5, 3, 3, 10, 12],
-    [12, 12, 6, 3, 10, 12, 12, 7, 2, 3, 9, 6, 3, 9, 13, 12],
-    [12, 12, 5, 9, 7, 8, 12, 5, 1, 9, 6, 3, 3, 10, 12, 12],
-    [12, 12, 12, 6, 9, 12, 12, 6, 10, 6, 1, 11, 5, 1, 8, 12],
-    [12, 12, 12, 5, 10, 4, 10, 7, 1, 9, 6, 9, 12, 14, 12, 12],
-    [12, 12, 12, 6, 3, 10, 5, 9, 12, 6, 9, 6, 0, 3, 8, 12],
-    [12, 12, 6, 3, 3, 9, 12, 12, 6, 9, 6, 9, 6, 9, 12, 12],
-    [12, 12, 5, 3, 3, 10, 12, 12, 7, 2, 9, 6, 9, 6, 8, 12],
-    [4, 8, 12, 7, 3, 3, 8, 12, 7, 3, 2, 9, 6, 9, 12, 12],
-    [12, 12, 6, 3, 3, 3, 10, 6, 3, 3, 3, 10, 7, 2, 10, 12],
-    [14, 6, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 10]
-]; */
-
 const MAP0 = [
     [DIRS.u | DIRS.l, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u | DIRS.r],
     [DIRS.l, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DIRS.r],
@@ -83,26 +43,4 @@ const MAP1 = [
     [ 14, 6, 3, 3, 3, 2, 3, 2, 3, 3, 3, 3, 2, 2, 3, 10 ]
 ]
 
-function validate(map) {
-    for (let i = 0; i < grid.y; i++) {
-        for (let j = 0; j < grid.x; j++) {
-            if (j > 0 && (!!(map[i, j] & DIRS.l) !== !!(map[i, j - 1] & DIRS.r))) {
-                throw `(${i}, ${j}).L != (${i}, ${j - 1}).R`;
-            }
-            if (j < grid.x - 1 && (!!(map[i, j] & DIRS.r) !== !!(map[i, j + 1] & DIRS.l))) {
-                throw `(${i}, ${j}).R != (${i}, ${j + 1}).L`;
-            }
-            if (i > 0 && (!!(map[i, j] & DIRS.u) !== !!(map[i - 1, j] & DIRS.d))) {
-                throw `(${i}, ${j}).U != (${i - 1}, ${j}).D`;
-            }
-            if (i < grid.y - 1 && (!!(map[i, j] & DIRS.d) !== !!(map[i + 1, j] & DIRS.u))) {
-                throw `(${i}, ${j}).D != (${i + 1}, ${j}).U`;
-            }
-        }
-    }
-}
-
-export { DIRS, MAP0, MAP1, rightOf, leftOf };
-globalThis.rightOf = rightOf;
-globalThis.leftOf = leftOf;
-//	
+export { DIRS, MAP0, MAP1 };
