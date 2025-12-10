@@ -502,6 +502,7 @@ function astar(d1, d2, htype) {
 			let nG = (G[u.y][u.x] + 1)
 
 			let N = neighbors(u);
+			let pushed = false
 			for (let i = 0; i < N.length; i++) {
 				let v = N[i]
 				if (!visited[v.y][v.x]) {
@@ -516,9 +517,13 @@ function astar(d1, d2, htype) {
 						parent[v.y][v.x] = u
 
 						pq.push(v)
-						insesort(pq, 0, (pq.length-1));
+
+						pushed = true
 					}
 				}
+			}
+			if (pushed) {
+				insesort(pq);
 			}
 		}
 	}
@@ -546,6 +551,7 @@ function dijkstra(d1, d2) {
 		} else if (!visited[u.y][u.x]) {
 			visited[u.y][u.x] = true;
 			let N = neighbors(u);
+			let pushed = false
 			for (let i = 0; i < N.length; i++) {
 				let v = N[i]
 				if (!visited[v.y][v.x]) {
@@ -562,8 +568,12 @@ function dijkstra(d1, d2) {
 					parent[v.y][v.x] = u
 
 					pq.push(v)
-					pq = qsort(pq, 0, (pq.length-1));
+
+					pushed = true
 				}
+			}
+			if (pushed) {
+				insesort(pq);
 			}
 		}
 	}
