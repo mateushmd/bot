@@ -486,8 +486,6 @@ function heuristic (type, pos, v1, v2) {
 			value = Math.min(value, f(pos, new Vector2(ix, iy)));
 		}
 	}
-
-	value = 0
 	return (value)
 }
 
