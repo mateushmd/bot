@@ -108,10 +108,14 @@ editBtn.addEventListener('click', (e) => {
         mode = MODES.editing;
         playBtn.disabled = true;
         editInterval = setInterval(editTick, 1000 / 15);
+		emptyMap.disabled = true
+		testMap.disabled = true
     } else if (mode === MODES.editing) {
         button.innerHTML = 'Editar';
         mode = MODES.idle;
         playBtn.disabled = false;
+		emptyMap.disabled = false
+		testMap.disabled = false
         clearInterval(editInterval);
     }
 });
