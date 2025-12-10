@@ -26,7 +26,7 @@ function leftOf(x) {
 }
 
 /*
-const MAP0 = [
+const MAPx = [
     [5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 9],
     [12, 5, 3, 3, 3, 3, 3, 3, 3, 3, 1, 3, 3, 3, 3, 8],
     [12, 12, 5, 3, 3, 3, 1, 3, 11, 7, 2, 1, 3, 3, 9, 12],
@@ -44,6 +44,25 @@ const MAP0 = [
     [12, 12, 6, 3, 3, 3, 10, 6, 3, 3, 3, 10, 7, 2, 10, 12],
     [14, 6, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 10]
 ]; */
+
+const MAP0 = [
+    [DIRS.u | DIRS.l, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u | DIRS.r],
+    [DIRS.l, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DIRS.r],
+    [DIRS.l, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DIRS.r],
+    [DIRS.l, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DIRS.r],
+    [DIRS.l, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DIRS.r],
+    [DIRS.l, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DIRS.r],
+    [DIRS.l, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DIRS.r],
+    [DIRS.l, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DIRS.r],
+    [DIRS.l, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DIRS.r],
+    [DIRS.l, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DIRS.r],
+    [DIRS.l, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DIRS.r],
+    [DIRS.l, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DIRS.r],
+    [DIRS.l, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DIRS.r],
+    [DIRS.l, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DIRS.r],
+    [DIRS.l, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DIRS.r],
+    [DIRS.d | DIRS.l, DIRS.d, DIRS.d, DIRS.d, DIRS.d, DIRS.d, DIRS.d, DIRS.d, DIRS.d, DIRS.d, DIRS.d, DIRS.d, DIRS.d, DIRS.d, DIRS.d, DIRS.d | DIRS.r],
+];
 
 const MAP1 = [
     [ 5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 9 ],
@@ -83,7 +102,7 @@ function validate(map) {
     }
 }
 
-export { DIRS, MAP1, rightOf, leftOf };
+export { DIRS, MAP0, MAP1, rightOf, leftOf };
 globalThis.rightOf = rightOf;
 globalThis.leftOf = leftOf;
 //	

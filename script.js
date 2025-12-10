@@ -1,4 +1,4 @@
-import { DIRS, MAP1, rightOf, leftOf } from './maps.js';
+import { DIRS, MAP0, MAP1, rightOf, leftOf } from './maps.js';
 
 class Vector2 {
     constructor(x, y) {
@@ -36,6 +36,8 @@ const editBtn = document.querySelector('#edit');
 const initx = document.querySelector('#inix');
 const inity = document.querySelector('#iniy');
 const count = document.querySelector('span#node-count');
+const emptyMap = document.querySelector('#map0');
+const testMap = document.querySelector('#map1');
 
 let screenSize = new Vector2(canvas.width, canvas.height);
 let gridSize = new Vector2(16, 16);
@@ -49,9 +51,10 @@ let editInterval = null;
 let searchMethod = 0; // 0 -> A* (manhattan)
 					  // 1 -> A* (euclidean)
 					  // 2 -> A* (chebyshev)
-	    			  // 3 -> A* (random)
-	  				  // 4 -> Dijkstra
-					  // 5 -> Bfs
+	    			  // 3 -> A* (octile)
+	    			  // 4 -> A* (random)
+	  				  // 5 -> Dijkstra
+					  // 6 -> Bfs
 
 let map = [
     [DIRS.u | DIRS.l, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u | DIRS.r],
@@ -77,8 +80,7 @@ let wallPreview = null;
 document.addEventListener('DOMContentLoaded', init);
 document.addEventListener('mousemove', (e) => getMousePos(e));
 document.addEventListener('mouseenter', (e) => getMousePos(e));
-playBtn.addEventListener('click', (e) => {
-    const button = e.target;
+playBtn.addEventListener('click', () => {
     if (mode === MODES.idle) {
 		playBtn.disabled = true;
         restartBtn.disabled = false;
@@ -130,10 +132,12 @@ document.querySelector("select").addEventListener("change", (e) => {
 		searchMethod = 2
 	} else if (selected === "astar4") {
 		searchMethod = 3
-	} else if (selected === "dijkstra") {
+	} else if (selected === "astar5") {
 		searchMethod = 4
-	} else if (selected === "bfs") {
+	} else if (selected === "dijkstra") {
 		searchMethod = 5
+	} else if (selected === "bfs") {
+		searchMethod = 6
 	}
 
 });
@@ -149,6 +153,16 @@ inity.addEventListener("change", (e) => {
 	restartBtn.click()
 	const selected = e.target.value
 	robot.pos.y = parseInt(selected)
+	redraw()
+});
+
+emptyMap.addEventListener("click", () => {
+	map = MAP0
+	redraw()
+});
+
+testMap.addEventListener("click", () => {
+	map = MAP1
 	redraw()
 });
 
@@ -422,21 +436,54 @@ function chebyshev (v1, v2) {
 	return Math.max(Math.abs(v1.x-v2.x), Math.abs(v1.y-v2.y));
 }
 
+function octile (v1, v2) {
+	let ccost = 1
+	let dcost = 1.41421	// sqrt(2)
+
+	let dx = Math.abs(v1.x - v2.x)
+	let dy = Math.abs(v1.y - v2.y)
+
+	let diag = Math.abs(dx-dy)
+	let card = Math.min(dx, dy)
+
+	return ( (diag * dcost) + (card * ccost) )
+}
+
 function randomH () {
 	return (Math.floor(Math.random() * 100))
 }
 
 function heuristic (type, pos, v1, v2) {
-	let value = -1
+
+	let f = undefined
+
 	if (type === 0) {
-		value = Math.min(manhattan(pos, v1), manhattan(pos, v2));
+		f = manhattan
 	} else if (type === 1) {
-		value = Math.min(euclidean(pos, v1), euclidean(pos, v2));
+		f = euclidean
 	} else if (type === 2) {
-		value = Math.min(chebyshev(pos, v1), chebyshev(pos, v2));
+		f = chebyshev
 	} else if (type === 3) {
-		value = randomH();
+		f = octile
+	} else if (type === 4) {
+		f = randomH 
 	}
+
+	let value = Infinity
+
+	let dx = Math.abs(v1.x - v2.x) + 1
+	let dy = Math.abs(v1.y - v2.y) + 1
+
+	let x = Math.min(v1.x, v2.x)
+	let y = Math.min(v1.y, v2.y)
+
+	for (let ix = x; ix < x+dx; ix++) {
+		for (let iy = y; iy < y+dy; iy++) {
+			value = Math.min(value, f(pos, new Vector2(ix, iy)));
+		}
+	}
+
+	value = 0
 	return (value)
 }
 
@@ -505,7 +552,7 @@ function astar(d1, d2, htype) {
 			let pushed = false
 			for (let i = 0; i < N.length; i++) {
 				let v = N[i]
-				if (!visited[v.y][v.x]) {
+				if (!visited[v.y][v.x] && G[v.y][v.x] > (G[u.y][u.x] + 1)) {
 
 					if (G[v.y][v.x] > nG) {
 						G[v.y][v.x] = nG 
@@ -549,17 +596,18 @@ function dijkstra(d1, d2) {
 		if (inRange(u, d1, d2)) {
 			stop = u
 		} else if (!visited[u.y][u.x]) {
+
 			visited[u.y][u.x] = true;
+
+			let nG = (G[u.y][u.x] + 1)
+
 			let N = neighbors(u);
 			let pushed = false
 			for (let i = 0; i < N.length; i++) {
 				let v = N[i]
-				if (!visited[v.y][v.x]) {
+				if (!visited[v.y][v.x] && G[v.y][v.x] > (nG)) {
 
-										
-					if (G[v.y][v.x] > (G[u.y][u.x] + 1)) {
-						G[v.y][v.x] = G[u.y][u.x] + 1
-					}
+					G[v.y][v.x] = nG
 
 					if (H[v.y][v.x] === Infinity) {
 						H[v.y][v.x] = 0
@@ -599,22 +647,17 @@ function BFS(d1, d2) {
 		if (inRange(u, d1, d2)) {
 			stop = u
 		} else if (!visited[u.y][u.x]) {
+
 			visited[u.y][u.x] = true;
+
+			let nG = G[u.y][u.x] + 1;
+
 			let N = neighbors(u);
 			for (let i = 0; i < N.length; i++) {
 				let v = N[i]
-				if (!visited[v.y][v.x]) {
-
-					if (G[v.y][v.x] > (G[u.y][u.x] + 1)) {
-						G[v.y][v.x] = G[u.y][u.x] + 1
-					}
-
-					if (H[v.y][v.x] === Infinity) {
-						H[v.y][v.x] = 0
-					}
-
+				if (!visited[v.y][v.x] && G[v.y][v.x] > (nG)) {
+					G[v.y][v.x] = nG
 					parent[v.y][v.x] = u
-
 					pq.push(v)
 				}
 			}
@@ -635,16 +678,18 @@ function BFS(d1, d2) {
 function searchDraw() {
 	let path = []
 	if (searchMethod == 0) {
-		path = astar(new Vector2(7,7), new Vector2(8,8), 0)
+		path = astar(new Vector2(7,7), new Vector2(8,8), 0) // manhattan
 	} else if (searchMethod == 1) {
-		path = astar(new Vector2(7,7), new Vector2(8,8), 1)
+		path = astar(new Vector2(7,7), new Vector2(8,8), 1) // euclidean
 	} else if (searchMethod == 2) {
-		path = astar(new Vector2(7,7), new Vector2(8,8), 2)
+		path = astar(new Vector2(7,7), new Vector2(8,8), 2) // chebyshev
 	} else if (searchMethod == 3) {
-		path = astar(new Vector2(7,7), new Vector2(8,8), 3)
+		path = astar(new Vector2(7,7), new Vector2(8,8), 3) // octile
 	} else if (searchMethod == 4) {
-		path = dijkstra(new Vector2(7,7), new Vector2(8,8))
+		path = astar(new Vector2(7,7), new Vector2(8,8), 4) // random
 	} else if (searchMethod == 5) {
+		path = dijkstra(new Vector2(7,7), new Vector2(8,8))
+	} else if (searchMethod == 6) {
 		path = BFS(new Vector2(7,7), new Vector2(8,8))
 	}
 	count.innerHTML = path.length

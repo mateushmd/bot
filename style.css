@@ -78,3 +78,8 @@ span#node-count {
 	font-size: 36px;
 	color: white;
 }
+
+section#main-btn {
+	display: flex;
+	justify-content: space-between;
+}

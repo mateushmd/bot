@@ -24,16 +24,28 @@
 			  <option value="astar1">A* (Manhattan)</option>
 			  <option value="astar2">A* (Euclidean)</option>
 			  <option value="astar3">A* (Chebyshev)</option>
-			  <option value="astar4">A* (Random)</option>
+			  <option value="astar4">A* (Octile)</option>
+			  <option value="astar5">A* (Random)</option>
 			  <option value="dijkstra">Dijkstra</option>
 			  <option value="bfs">BFS</option>
 			</select>
 			<span id="node-count">0</span>
+
             <canvas width="600" height="600"></canvas>
+
+            <section id="main-btn">
+				<span>
+					<button id="play">Iniciar</button>
+					<button id="restart" disabled>Reiniciar</button>
+					<button id="edit">Editar</button>
+				</span>
+				<span>
+					<button id="map0">Mapa Vazio</button>
+					<button id="map1">Mapa de Teste</button>
+				</span>
+            </section>
+
             <section>
-                <button id="play">Iniciar</button>
-                <button id="restart" disabled>Reiniciar</button>
-                <button id="edit">Editar</button>
 				<div id="input-box">
 					<input type="number" id="inix" name="x inicial" min="0" max="15" value="0">
 					<span>x</span>
@@ -43,6 +55,7 @@
 					<span>y</span>
 				</div>
             </section>
+
         </div>
     </main>
 </body>
