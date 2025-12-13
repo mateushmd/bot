@@ -74,12 +74,12 @@ button:hover {
     cursor: pointer;
 }
 
-span#node-count {
+#info span {
 	font-size: 36px;
 	color: white;
 }
 
-section#main-btn {
+section#main-btn, section#info {
 	display: flex;
-	justify-content: space-between;
+	justify-content: space-evenly;
 }

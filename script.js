@@ -35,7 +35,8 @@ const restartBtn = document.querySelector('#restart');
 const editBtn = document.querySelector('#edit');
 const initx = document.querySelector('#inix');
 const inity = document.querySelector('#iniy');
-const count = document.querySelector('span#node-count');
+const ansCount = document.querySelector('span#node-count');
+const expCount = document.querySelector('span#explored-count');
 const emptyMap = document.querySelector('#map0');
 const testMap = document.querySelector('#map1');
 
@@ -55,6 +56,8 @@ let searchMethod = 0; // 0 -> A* (manhattan)
 	    			  // 4 -> A* (random)
 	  				  // 5 -> Dijkstra
 					  // 6 -> Bfs
+
+let exploredCount = 0;
 
 let map = [
     [DIRS.u | DIRS.l, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u, DIRS.u | DIRS.r],
@@ -93,7 +96,8 @@ restartBtn.addEventListener('click', (e) => {
     const button = e.target;
     if (mode !== MODES.editing) {
         mode = MODES.idle;
-		count.innerHTML = 0
+		ansCount.innerHTML = 0
+		expCount.innerHTML = 0
         editBtn.disabled = false;
         playBtn.disabled = false;
         playBtn.innerHTML = 'Iniciar';
@@ -546,6 +550,7 @@ function astar(d1, d2, htype) {
 			stop = u
 		} else if (!visited[u.y][u.x]) {
 
+			exploredCount++;
 			visited[u.y][u.x] = true;
 
 			let nG = (G[u.y][u.x] + 1)
@@ -599,6 +604,7 @@ function dijkstra(d1, d2) {
 			stop = u
 		} else if (!visited[u.y][u.x]) {
 
+			exploredCount++;
 			visited[u.y][u.x] = true;
 
 			let nG = (G[u.y][u.x] + 1)
@@ -650,6 +656,7 @@ function BFS(d1, d2) {
 			stop = u
 		} else if (!visited[u.y][u.x]) {
 
+			exploredCount++;
 			visited[u.y][u.x] = true;
 
 			let nG = G[u.y][u.x] + 1;
@@ -679,6 +686,7 @@ function BFS(d1, d2) {
 
 function searchDraw() {
 	let path = []
+	exploredCount = 0;
 	if (searchMethod == 0) {
 		path = astar(new Vector2(7,7), new Vector2(8,8), 0) // manhattan
 	} else if (searchMethod == 1) {
@@ -694,7 +702,8 @@ function searchDraw() {
 	} else if (searchMethod == 6) {
 		path = BFS(new Vector2(7,7), new Vector2(8,8))
 	}
-	count.innerHTML = path.length
+	ansCount.innerHTML = path.length;
+	expCount.innerHTML = exploredCount+1;
 
 	context.fillStyle = '#0000FF60';
 	for (let i = 0; i < path.length; i++) {
